@@ -1,0 +1,86 @@
+package practice;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+
+public class Myntra {
+	public static void main(String[] args) throws InterruptedException {
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver.exe");
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+
+		//  go to url
+		driver.get("https://www.myntra.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+		// mouse over to women
+		Actions action = new Actions(driver);
+		action.moveToElement(driver.findElement(By.xpath("(//a[@class='desktop-main'])[2]"))).perform();
+
+		// click jackets & coats
+		driver.findElement(By.xpath("//a[@data-reactid='231']")).click();
+		// Find total count of the items
+		String str = driver.findElementByClassName("title-count").getText();
+		String text = str.replaceAll("\\D", "");
+		int totCount = Integer.parseInt(text);
+		System.out.println(totCount);
+		// validate sum of categories matches with total count of items
+		String str1 = driver.findElementByXPath("(//span[@class='categories-num'])[1]").getText();
+		String text1 = str1.replaceAll("\\D", "");
+		int jacketsCount = Integer.parseInt(text1);
+
+		String str2 = driver.findElementByXPath("(//span[@class='categories-num'])[2]").getText();
+		String text2 = str2.replaceAll("\\D", "");
+		int coatsCount = Integer.parseInt(text2);
+
+		if ((jacketsCount + coatsCount) == totCount) {
+			System.out.println("Total count of items are equal");
+		}
+
+		// check coats
+		driver.findElementByXPath("(//div[@class='common-checkboxIndicator'])[2]").click();
+		// Click More options under brand
+		driver.findElementByClassName("brand-more").click();
+		// Type MANGO and click check box
+		driver.findElementByClassName("FilterDirectory-searchInput").sendKeys("MANGO");
+
+		driver.findElementByXPath("//span[@class='FilterDirectory-count']/following-sibling::div[1]").click();
+
+		// Close the popup X
+		driver.findElementByXPath("//span[contains(@class,'myntraweb-sprite FilterDirectory-close')]").click();
+
+		Thread.sleep(3000);
+
+		// Confirm all the Brands are MANGO
+		List<WebElement> brandName = driver.findElementsByXPath("//h3[@class='product-brand']");
+		for (WebElement name : brandName) {
+			String nameOfBrand = name.getText();
+			if (nameOfBrand.equalsIgnoreCase("MANGO")) {
+				System.out.println("All the coats are Mango brand");
+			}
+		}
+		// sort for BetterDiscount
+		action.moveToElement(driver.findElementByClassName("sort-sortBy")).perform();
+		driver.findElementByXPath("(//label[@class='sort-label '])[3]").click();
+		Thread.sleep(3000);
+		// Display price of the first displyed item
+		String strPrice = driver.findElementByXPath("(//span[@class='product-discountedPrice'])[1]").getText();
+		String price = strPrice.replaceAll("\\D", "");
+		int betterPrice = Integer.parseInt(price);
+		System.out.println("price is" + betterPrice);
+		// Move over on size of the first item
+		action.moveToElement(driver.findElementByXPath("(//h4[@class='product-product'])[1]")).build().perform();
+		// click on wishlist now
+		driver.findElementByXPath("(//span[contains(@class,'product-actionsButton product-wishlist')])[1]").click();
+		// Close Browser
+		driver.close();
+	}
+}
