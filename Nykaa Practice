@@ -1,0 +1,94 @@
+package practice;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.openqa.selenium.By;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+
+public class Nykaa {
+
+	public static void main(String[] args) throws InterruptedException {
+
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver.exe");
+		ChromeDriver driver = new ChromeDriver();
+
+		// Launch url
+		driver.get("https://www.nykaa.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+		// Mouseover on Brands and then mouse over on Popular
+		Actions action = new Actions(driver);
+		action.moveToElement(driver.findElement(By.xpath("(//a[@href='#'])[2]"))).build().perform();
+		action.moveToElement(driver.findElement(By.xpath("//a[text()='Popular']"))).build().perform();
+
+		// Click L'Oreal Paris
+		driver.findElement(By.xpath("(//li[@class='brand-logo menu-links']//img)[5]")).click();
+
+		// Check the tilte on the new window
+		Set<String> windowHandles = driver.getWindowHandles();
+		List<String> list = new ArrayList<String>(windowHandles);
+		driver.switchTo().window(list.get(2));
+		System.out.println(driver.getTitle());
+		if (driver.getTitle().contains("L'Oreal Paris")) {
+			System.out.println("Name matches");
+		}
+
+		// Click sort By and select Customer top rated
+		driver.findElement(By.xpath("//span[@class='pull-right']")).click();
+		driver.findElement(By.xpath("(//input[@type='radio']/following-sibling::div)[4]")).click();
+		Thread.sleep(3000);
+
+		// Click category and click shampoo
+		driver.findElementByXPath("(//div[@class='clearfix'])[2]").click();
+		driver.findElementByXPath("//span[text()='Shampoo (21)']").click();
+
+		// Check whether the filter is applied with shampoo
+		String filterText = driver.findElementByXPath("//li[text()='Shampoo']").getText();
+		if (filterText.contains("Shampoo")) {
+			System.out.println("filter gives the shampoo product");
+		} else {
+			System.out.println("filter doesnt show shampoo product");
+		}
+
+		// Click on Colour protect shampoo
+		driver.findElementByXPath("(//img[@class='listing-img'])[4]").click();
+
+		// Select size as 175ml in new window
+		Set<String> windowHandles2 = driver.getWindowHandles();
+		List<String> list1 = new ArrayList<String>(windowHandles2);
+		driver.switchTo().window(list1.get(3));
+		driver.findElementByXPath("//span[text()='175ml']").click();
+
+		// Print the MRP of the product
+		String mrp = driver.findElementByXPath("(//span[@class='post-card__content-price-offer'])[1]").getText();
+		System.out.println("Price of the product is Rs:" + mrp.replaceAll("\\W", ""));
+
+		// Click on Add to Bag
+		driver.findElementByXPath("(//button[text()='ADD TO BAG'])[1]").click();
+
+		// Go to shopping Bag
+		driver.findElementByClassName("AddBagIcon").click();
+
+		// Print the grand total amount
+		String grandTotal = driver.findElementByXPath("//div[text()='Grand Total:']").getText();
+		System.out.println("grandtotal amount is Rs:" + grandTotal.replaceAll("\\D", ""));
+
+		// Click proceed
+		driver.findElementByXPath("//span[text()='Proceed']").click();
+
+		// Click continue as guest
+		driver.findElementByXPath("(//button[@type='button'])[2]").click();
+
+		// Display the warning message
+		System.out.println("Warning message :" + driver.findElementByClassName("message").getText());
+
+		// Close all the windows
+		driver.quit();
+
+	}
+
+}
