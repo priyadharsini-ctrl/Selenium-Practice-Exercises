@@ -1,0 +1,88 @@
+package practice;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class MakeMyTrip {
+
+	public static void main(String[] args) throws InterruptedException {
+
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver.exe");
+		ChromeDriver driver = new ChromeDriver();
+
+		// Launch url
+		driver.get("https://www.makemytrip.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+
+		// Click Hotels
+		driver.findElementByXPath("(//span[contains(@class,'chNavIcon appendBottom2')])[2]").click();
+
+		// Enter city as Goa and choose Goa,India
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementById("city")));
+		driver.findElementById("city").sendKeys("goa", Keys.TAB);
+		// Enter Check-in,Check-Out date
+		driver.findElementByXPath("(//div[text()='15'])[2]").click();
+		driver.findElementByXPath("(//div[text()='19'])[2]").click();
+
+		// Click on Rooms&Guests
+		// Click 2 Adults and 1 children age 11
+		driver.findElementByXPath("//span[text()=' Room ']").click();
+		driver.findElementByXPath("(//li[@class='selected'])[1]").click();
+		driver.findElementByXPath("//li[@data-cy='children-1']").click();
+		WebElement webElement = driver.findElementByXPath("//select[@data-cy='childAge-0']");
+		Select dropDown = new Select(webElement);
+		dropDown.selectByIndex(10);
+
+		// Click Apply
+		driver.findElementByXPath("(//button[@type='button'])[2]").click();
+
+		// Click Search
+		driver.findElementById("hsw_search_button").click();
+
+		// Select locality as Baga
+		driver.findElementByXPath("//div[@class='mmBackdrop wholeBlack']").click();
+		driver.findElementByXPath("//label[text()='Baga']").click();
+		Thread.sleep(3000);
+
+		// Select category as 5 Stars
+		wait.until(ExpectedConditions.elementToBeClickable(
+				driver.findElementByXPath("//ul[@class='filterList']//label[contains(text(),'5 Star')]"))).click();
+
+		// Click on first resulting hotel
+		driver.findElementByXPath("(//img[@alt='hotelImg'])[1]").click();
+
+		// New window opened print the Hotel name
+		Set<String> windowHandles = driver.getWindowHandles();
+		List<String> list = new ArrayList<String>(windowHandles);
+		driver.switchTo().window(list.get(2));
+		System.out.println(driver.getTitle());
+
+		// Click More options, select 3 months plan and close
+		driver.findElementByXPath("//span[text()='MORE OPTIONS']").click();
+		driver.findElementByXPath("(//span[text()='SELECT'])[1]").click();
+		driver.findElementByClassName("close").click();
+
+		// Click book button
+		driver.findElementByLinkText("BOOK THIS NOW").click();
+
+		// Print the total payable amount
+		String amount = driver.findElementById("revpg_total_payable_amt").getText();
+		System.out.println(amount);
+
+		// Clpse all the windows
+		driver.quit();
+	}
+
+}
