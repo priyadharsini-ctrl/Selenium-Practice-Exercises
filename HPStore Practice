@@ -1,0 +1,120 @@
+package practice;
+
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class HpStore {
+
+	public static void main(String[] args) throws InterruptedException {
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver.exe");
+		ChromeDriver driver = new ChromeDriver();
+
+		// Launch url
+		driver.get("https://store.hp.com/in-en/default");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+
+		// To check for login pop up
+		try {
+			boolean close = wait
+					.until(ExpectedConditions
+							.visibilityOf(driver.findElementByXPath("//span[@class='optly-modal-close close-icon']")))
+					.isDisplayed();
+			if (close == true) {
+				driver.findElementByXPath("//span[@class='optly-modal-close close-icon']").click();
+			}
+		} catch (Exception e) {
+			System.out.println("Close pop up not displayed");
+		}
+		driver.findElementByXPath("//button[@aria-label='Close']").click();
+
+		// Mouse over on Laptop and click Pavilion
+		Actions action = new Actions(driver);
+		action.moveToElement(driver.findElementByXPath("(//span[text()='Laptops'])[1]")).perform();
+		driver.findElementByXPath("(//span[text()='Pavilion'])[1]").click();
+
+		// Select procesor intel core i7
+		driver.findElementByXPath("(//dt[@class='filter-options-title'])[5]").click();
+		driver.findElementByXPath("(//input[@class='product-filter-checkbox'])[2]").click();
+
+		// To check for window popup
+		try {
+
+			boolean popupClose = wait
+					.until(ExpectedConditions.visibilityOf(
+							driver.findElementByXPath("//div[@class='inside_closeButton fonticon icon-hclose']")))
+					.isDisplayed();
+			if (popupClose == true) {
+				driver.findElementByXPath("//div[@class='inside_closeButton fonticon icon-hclose']").click();
+			}
+		} catch (Exception e) {
+			System.out.println("pop up not displayed");
+		}
+
+		// Harddrive capacity more than 1TB
+		driver.findElementByXPath("(//input[@class='product-filter-checkbox'])[14]").click();
+		Thread.sleep(3000);
+
+		// Sort by: price->Low To High
+		WebElement webElement = driver.findElementById("sorter");
+		Select dropDown = new Select(webElement);
+		dropDown.selectByValue("price_asc");
+		Thread.sleep(3000);
+
+		// Print name and Price of the first result
+		System.out.println("Name of laptop is :" + driver.findElementByLinkText("HP Pavilion - 15-cs3008tx").getText());
+		String TotPrice = driver.findElementByXPath("(//span[@class='price'])[2]").getText().replaceAll("\\D", "");
+		int price = Integer.parseInt(TotPrice);
+		System.out.println("Total price of the laptop is: " + price);
+
+		// Click on Add to Cart
+		driver.findElementByXPath("(//span[text()='Add To Cart'])[1]").click();
+		Thread.sleep(5000);
+
+		// Click on Shopping cart icon-> click on view and edit cart
+		driver.findElementByXPath("//div[@class='minicart-wrapper']").click();
+		driver.findElementByXPath("//span[text()='View and edit cart']").click();
+		Thread.sleep(3000);
+
+		// Check shipping option -> check pincode
+		driver.findElementById("standard_delivery").click();
+		driver.findElementByName("pincode").sendKeys("600047");
+		driver.findElementByXPath("//button[text()='check']").click();
+		String stock = driver.findElementByXPath("//span[@class='available']").getText();
+		String stockMsg = driver.findElementByXPath("//span[@class='available']/following-sibling::span[1]").getText();
+		System.out.println("Standard delivery check output: " + stock + stockMsg);
+
+		// Verify the order total against total price
+		String orderTot = driver.findElementByXPath("//span[@data-bind='text: getValue()']").getText();
+		int orderPrice = Integer.parseInt(orderTot.replaceAll("\\D", ""));
+		System.out.println("Order price is: " + orderPrice);
+
+		// Proceed to checkout if order total matches total price
+		if (orderPrice == price) {
+			System.out.println("OrderTotal is equal to total price");
+			driver.findElementByXPath("(//span[text()='Proceed to Checkout'])[1]").click();
+		} else {
+			System.out.println("Price doesn't match");
+			driver.close();
+		}
+
+		// Click on place order
+		driver.findElementByXPath("(//span[text()='Place Order'])[4]").click();
+
+		// Cpature the Error message and print
+		String msg = driver.findElementByXPath("//div[@class='message notice']").getText();
+		System.out.println("Error Message displayed: " + msg);
+
+		// Close the browser
+		driver.close();
+
+	}
+
+}
