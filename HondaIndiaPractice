@@ -1,0 +1,130 @@
+package practice;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Honda {
+
+	public static void main(String[] args) throws InterruptedException {
+
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+
+		// go to url
+		driver.get("https://www.honda2wheelersindia.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		Actions action = new Actions(driver);
+
+		// Click on scooters and click dio
+		driver.findElementByClassName("close").click();
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementById("link_Scooter")));
+		driver.findElementById("link_Scooter").click();
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("(//div[@class='item']//img)[4]")));
+		driver.findElementByXPath("(//div[@class='item']//img)[4]").click();
+
+		// Click on Specifications and mouseover on ENGINE
+		driver.findElementByLinkText("Specifications").click();
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByName("2")));
+		action.moveToElement(driver.findElementByName("2")).perform();
+
+		// Get Displacement value
+		String dioDisplacement = driver.findElementByXPath("//span[text()='Displacement']/following-sibling::span")
+				.getText();
+		System.out.println("Dio Engine Displacement value is:" + dioDisplacement);
+		String str1 = dioDisplacement.replaceAll("\\D", "").substring(0, 3);
+
+		// Go to Scooters and click Activa 125
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementById("link_Scooter")));
+		driver.findElementById("link_Scooter").click();
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("(//div[@class='item']//img)[6]")));
+		driver.findElementByXPath("(//div[@class='item']//img)[6]").click();
+
+		// Click on Specifications and mouseover on ENGINE
+		driver.findElementByLinkText("Specifications").click();
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByName("4")));
+		action.moveToElement(driver.findElementByName("4")).perform();
+
+		// Get Displacement value
+		String activaDisplacement = driver.findElementByXPath("//span[text()='Displacement']/following-sibling::span")
+				.getText();
+		System.out.println("Activa 125 displacement value is: " + activaDisplacement);
+		String str2 = activaDisplacement.replaceAll("\\D", "");
+		int dio = Integer.parseInt(str1);
+		int activa = Integer.parseInt(str2);
+
+		// Compare Displacement of Dio and Activa 125 and print the Scooter name having
+		// better Displacement.
+		if (activa > dio) {
+			System.out.println("Better displacement is activa" + activa + "cc");
+		} else {
+			System.out.println("Better displacement is dio" + dio + "cc");
+		}
+
+		// Click FAQ from Menu
+		driver.findElementByXPath("(//a[@href='/FAQ'])[1]").click();
+
+		// Click Activa 125 BS-VI under Browse By Product
+		// Click Vehicle Price
+		driver.findElementByLinkText("Activa 125 BS-VI").click();
+		driver.findElementByXPath("//li[@id='li6']//a[1]").click();
+
+		// Make sure Activa 125 BS-VI selected and click submit
+		WebElement element = driver.findElementById("ModelID6");
+		Select select = new Select(element);
+		WebElement firstSelectedOption = select.getFirstSelectedOption();
+		String name = firstSelectedOption.getText();
+		if (name.contains("Activa")) {
+			System.out.println("Vehicle name is" + name + ".verified");
+		} else {
+			System.out.println("Correct vehicle is not clicked");
+		}
+
+		driver.findElementById("submit6").click();
+		Thread.sleep(3000);
+
+		// click the price link
+		driver.findElementByXPath("//table[@id='tblPriceMasterFilters']/tbody[1]/tr[1]/td[3]/a[1]").click();
+
+		// Go to the new Window and select the state as Tamil Nadu and city as Chennai
+		Set<String> set = driver.getWindowHandles();
+		List<String> list = new ArrayList<String>(set);
+		driver.switchTo().window(list.get(2));
+		WebElement element2 = driver.findElementById("StateID");
+		Select sel = new Select(element2);
+		sel.selectByVisibleText("Tamil Nadu");
+		WebElement element3 = driver.findElementById("CityID");
+		Select city = new Select(element3);
+		city.selectByVisibleText("Chennai");
+
+		// Click on search button
+		driver.findElementByXPath("//button[text()='Search']").click();
+
+		// Print all the 3 models and their prices
+		WebElement table = driver.findElement(By.id("gvshow"));
+		List<WebElement> models = table.findElements(By.tagName("td"));
+		for (WebElement model : models) {
+			System.out.println(model.getText());
+		}
+
+		// Close all windows
+		driver.quit();
+	}
+
+}
