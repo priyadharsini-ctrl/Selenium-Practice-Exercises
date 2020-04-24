@@ -1,0 +1,124 @@
+package practice;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Pepperfry {
+
+	public static void main(String[] args) throws InterruptedException, IOException {
+
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+
+		// go to url
+		driver.get("https://www.pepperfry.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		Actions action = new Actions(driver);
+
+		// Mouseover on Furniture and click Office Chairs under Chairs
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("//a[@class='level-top']")));
+		action.moveToElement(driver.findElementByXPath("//a[@class='level-top']")).perform();
+		driver.findElementByXPath("//a[text()='Office Chairs']").click();
+		Thread.sleep(5000);
+
+		// click Executive Chairs
+		// Change the minimum Height as 50 in under Dimensions
+
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("//div[@id='regPopUp']/a")));
+		driver.findElementByXPath("//div[@id='regPopUp']/a").click();
+		wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath("//h5[text()='Executive Chairs']"))));
+		driver.findElement(By.xpath("//h5[text()='Executive Chairs']")).click();
+		driver.findElementByXPath(
+				"//div[@class='clip__filter-dimension-input-holder']/input[@class='clipFilterDimensionHeightValue']")
+				.clear();
+		driver.findElementByXPath(
+				"//div[@class='clip__filter-dimension-input-holder']/input[@class='clipFilterDimensionHeightValue']")
+				.sendKeys("50");
+		Thread.sleep(2000);
+
+		// Add "Poise Executive Chair in Black Colour" chair to Wishlist
+		wait.until(ExpectedConditions.elementToBeClickable(
+				By.xpath("//div[@id='productView']//a[text()='Poise Executive Chair in Black Colour']")));
+		driver.navigate().refresh();
+		driver.findElementByXPath("//a[@data-productname='Poise Executive Chair in Black Colour']").click();
+
+		// Mouseover on Homeware and Click Pressure Cookers under Cookware
+		// Select Prestige as Brand
+		// Select Capacity as 1-3 Ltr
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("//a[@rel='meta-homeware']")));
+		action.moveToElement(driver.findElementByXPath("//a[@rel='meta-homeware']")).perform();
+		driver.findElementByXPath("//a[text()='Pressure Cookers']").click();
+		Thread.sleep(5000);
+		driver.findElementByXPath("//label[@for='brandsnamePrestige']").click();
+		Thread.sleep(3000);
+		driver.findElementByXPath("//label[@for='capacity_db1_Ltr_-_3_Ltr']").click();
+		Thread.sleep(3000);
+
+		// Add "Nakshatra Cute Metallic Red Aluminium Cooker 2 Ltr" to Wishlist
+		wait.until(ExpectedConditions
+				.elementToBeClickable(By.xpath("//a[@title='Nakshatra Cute Metallic Red Aluminium Cooker 2 Ltr']")));
+		driver.findElementByXPath("//a[@data-productname='Nakshatra Cute Metallic Red Aluminium Cooker 2 Ltr']")
+				.click();
+		Thread.sleep(3000);
+
+		// Verify the number of items in Wishlist
+		wait.until(ExpectedConditions
+				.visibilityOf(driver.findElementByXPath("//a[@data-tooltip='Wishlist']/following-sibling::span")));
+		String count = driver.findElementByXPath("//a[@data-tooltip='Wishlist']/following-sibling::span").getText();
+		System.out.println("Total count of wishlist: " + count);
+
+		// Navigate to Wishlist
+		driver.findElementByXPath("//a[@data-tooltip='Wishlist']").click();
+		Thread.sleep(3000);
+
+		// Move Pressure Cooker only to Cart from Wishlist
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		WebElement element = driver.findElementByXPath("(//div[@class='action_block']/a[@class='addtocart_icon'])[2]");
+		js.executeScript("arguments[0].click()", element);
+
+		// Check for the availability for Pincode
+		Thread.sleep(3000);
+		driver.findElementByXPath("//input[@class='srvc_pin_text']").sendKeys("631501");
+		driver.findElementByXPath("//input[@class='srvc_pin_text']/following-sibling::a").click();
+		Thread.sleep(3000);
+
+		// Click Proceed to Pay Securely
+		driver.findElementByXPath("//a[text()='Proceed to pay securely ']").click();
+		Thread.sleep(3000);
+
+		// Click Proceed to Pay
+		driver.executeScript("window.scrollBy(0, 200)");
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("//a[text()='PLACE ORDER']")));
+		driver.findElementByXPath("//a[text()='PLACE ORDER']").click();
+		Thread.sleep(3000);
+		driver.findElementByXPath("(//div[@class='nCheckout__accrodian-header-right']//span)[1]").click();
+		Thread.sleep(2000);
+
+		// Capture the screenshot of the item under Order Item
+		File source = driver.findElementById("ordersummary_accrodian").getScreenshotAs(OutputType.FILE);
+		File dest = new File("./snaps/img.jpg");
+		FileUtils.copyFile(source, dest);
+
+		// Close the browser
+		driver.close();
+	}
+
+}
