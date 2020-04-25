@@ -1,0 +1,134 @@
+package practice;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Crm {
+
+	public static void main(String[] args) throws InterruptedException {
+
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+
+		// go to url
+		driver.get("https://demo.1crmcloud.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		Actions action = new Actions(driver);
+
+		// Give username as admin and password as admin
+		// Choose theme as Claro Theme
+		driver.findElementById("login_user").sendKeys("admin");
+		driver.findElementById("login_pass").sendKeys("admin");
+		WebElement theme = driver.findElementById("login_theme");
+		Select sel = new Select(theme);
+		sel.selectByValue("Flex");
+
+		// Click on Sales and Marketting
+		// Click Create contact
+		driver.findElementByXPath("//button[@id='login_button']/span[1]").click();
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElementById("grouptab-1")));
+		driver.findElement(By.id("grouptab-1")).click();
+		Thread.sleep(3000);
+		wait.until(
+				ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//span[text()='Create Contact']")));
+		driver.findElementByXPath("//div[@class='sidebar-item']/a[@class='sidebar-item-link-basic']").click();
+
+		// Select Title and type First name, Last Name, Email and Phone Numbers
+		// Select Title and type First name, Last Name, Email and Phone Numbers
+		// Select Business Roles as "Sales"
+		// Fill the Primary Address, City, State, Country and Postal Code and click Save
+		driver.findElementByXPath("(//div[@title='(none)'])[1]").click();
+		driver.findElementByXPath("//div[text()='Mrs.']").click();
+		driver.findElementByName("first_name").sendKeys("Priyadharsini");
+		driver.findElementByName("last_name").sendKeys("S");
+		driver.findElementByName("email1").sendKeys("priya@gmail.com");
+		driver.findElementByName("phone_work").sendKeys("988458960");
+		driver.findElementByXPath("(//div[@title='(none)'])[2]").click();
+		driver.findElementByXPath("//div[text()='Public Relations']").click();
+		driver.findElementByXPath("(//div[@title='(none)'])[2]").click();
+		driver.findElementByXPath("//div[text()='Sales']").click();
+		driver.findElementByName("primary_address_street").sendKeys("No.6,gopalakrishna flats,Nanganallur");
+		driver.findElementByName("primary_address_city").sendKeys("Chennai");
+		driver.findElementByName("primary_address_state").sendKeys("TamilNadu");
+		driver.findElementByName("primary_address_country").sendKeys("India");
+		driver.findElementByName("primary_address_postalcode").sendKeys("600091");
+		driver.findElementById("DetailForm_save2-label").click();
+		Thread.sleep(8000);
+
+		// Duplicate contact if its already existing else create as new contact
+		if (driver.findElementByXPath("(//div[@class='input-icon left icon-accept'])[2]").isDisplayed() == true) {
+			driver.findElementByXPath("(//div[@class='input-icon left icon-accept'])[4]").click();
+			System.out.println("duplicated existing contact");
+			Thread.sleep(6000);
+		} else {
+			System.out.println("new Contact created");
+		}
+
+		// Mouse over on Today's Activities and click Meetings
+		// Click Create
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("//a[@id='grouptab-0']")));
+		action.moveToElement(driver.findElementByXPath("//a[@id='grouptab-0']")).perform();
+		driver.findElementByXPath(" //div[@class='tab-nav-sub']/div[4]/a").click();
+		Thread.sleep(2000);
+		driver.findElementByXPath("//span[text()='Create']").click();
+
+		// Type Subject as "Project Status" , Status as "Planned"
+		// Start Date & Time as tomorrow 3 pm and Duration as 1hr
+		driver.findElementByName("name").sendKeys("Project Status");
+		Thread.sleep(4000);
+		driver.findElementByXPath("//div[@class='input-label datetime-label text-number']").click();
+		Date date = new Date();
+		DateFormat sdf = new SimpleDateFormat("dd");
+		String today = sdf.format(date);
+		int tommorow = Integer.parseInt(today) + 1;
+		driver.findElementByXPath("(//input[@class='input-text'])[4]").sendKeys("2020-04-" + tommorow, Keys.ENTER);
+		driver.findElementByXPath("(//input[@class='input-text'])[4]").sendKeys("15", Keys.ENTER);
+		driver.findElementById("DetailFormduration-time").clear();
+		driver.findElementById("DetailFormduration-time").sendKeys("1hr", Keys.TAB);
+
+		// Click Add paricipants, add your created Contact name and click Save
+		driver.findElementByXPath("//button[@name='addInvitee']/span").click();
+
+		// Go to Sales and Marketting-->Contacts
+		// search the lead Name and click the name from the result
+		driver.findElementByXPath("//div[@id='app-search-text']/input").sendKeys("Priyadharsini s");
+		driver.findElementByXPath("(//div[@class='option-cell input-label '])[1]").click();
+		driver.findElementById("DetailForm_save2-label").click();
+		action.moveToElement(driver.findElementById("grouptab-1")).perform();
+		driver.findElementByXPath("//a[text()=' Contacts']").click();
+		driver.findElementById("filter_text").sendKeys("Priyadharsini S", Keys.ENTER);
+		Thread.sleep(8000);
+		driver.findElementByXPath("(//td[@class='listViewTd'])[2]/span/a").click();
+
+		// Check whether the Meeting is assigned to the contact under Activities Section
+		String contactName = driver.findElementByXPath("//div[@id='_form_header']/h3").getText();
+		System.out.println("Contact name is:" + contactName);
+		if (contactName.contains("Priyadharsini")) {
+			System.out.println("Meeting is assigned to the created contact");
+		} else {
+			System.out.println("Meeting not assigned");
+		}
+
+		// close browser
+		driver.close();
+	}
+
+}
