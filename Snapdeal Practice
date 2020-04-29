@@ -1,0 +1,117 @@
+package practice;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Snapdeal {
+
+	public static void main(String[] args) throws InterruptedException {
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+
+		// go to url
+		driver.get("https://www.snapdeal.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		Actions action = new Actions(driver);
+		// Mouse over on Toys, Kids' Fashion & more and click on Toys
+
+		action.moveToElement(driver.findElementByXPath("(//span[@class='catText'])[8]")).perform();
+
+		// Click Educational Toys in Toys & Games
+
+		driver.findElementByXPath("//span[text()='Toys']").click();
+		wait.until(ExpectedConditions
+				.elementToBeClickable(driver.findElementByXPath("(//div[@class='sub-cat-name '])[2]")));
+		driver.findElementByXPath("(//div[@class='sub-cat-name '])[2]").click();
+		// Click the Customer Rating 4 star and Up
+		Thread.sleep(3000);
+		wait.until(
+				ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//label[@for='avgRating-4.0']/a")));
+		driver.findElementByXPath("//label[@for='avgRating-4.0']").click();
+		Thread.sleep(3000);
+		// Click the offer as 40-50
+		wait.until(ExpectedConditions
+				.elementToBeClickable(driver.findElementByXPath("//label[@for='discount-40%20-%2050']/a")));
+		driver.findElementByXPath("//label[@for='discount-40%20-%2050']").click();
+		Thread.sleep(3000);
+		// Check the availability for the pincode
+		wait.until(ExpectedConditions
+				.visibilityOf(driver.findElementByXPath("//input[@placeholder='Enter your pincode']")));
+		driver.findElementByXPath("//input[@placeholder='Enter your pincode']").sendKeys("600091");
+		Thread.sleep(3000);
+		// Click the Quick View of the first product
+		driver.findElementByXPath("//button[@class='pincode-check']").click();
+		Thread.sleep(3000);
+		// Click on View Details
+		action.moveToElement(driver.findElementByXPath("(//p[@class='product-title'])[1]")).perform();
+		driver.findElementByXPath("(//div[contains(text(),'Quick View')])[1]").click();
+		Thread.sleep(3000);
+		// Capture the Price of the Product and Delivery Charge
+		driver.findElementByXPath("(//a[contains(@class,'btn btn-theme-secondary')])[1]").click();
+		Thread.sleep(3000);
+		String text = driver.findElementByXPath("//span[@class='pdp-final-price']/span").getText();
+		int price = Integer.parseInt(text);
+		String text1 = driver.findElementByXPath("(//span[@class='availCharges'])[2]").getText();
+		String replaceAll = text1.replaceAll("\\D", "");
+		int deliveryCharge = Integer.parseInt(replaceAll);
+		driver.findElementByXPath("//span[@class='intialtext']").click();
+		Thread.sleep(3000);
+		String finalP = driver.findElementByXPath("(//span[@class='price'])[2]").getText().replaceAll("\\D", "");
+		int finalPriceToy = Integer.parseInt(finalP);
+		// Validate the You Pay amount matches the sum of (price+deliver charge)
+		if (finalPriceToy == price + deliveryCharge) {
+			System.out.println("Amount is correct.Final toy price is:" + finalPriceToy);
+		} else {
+			System.out.println("Amount invalid" + finalPriceToy);
+		}
+		// Search for Sanitizer
+		driver.findElementById("inputValEnter").sendKeys("Sanitizer", Keys.ENTER);
+		// Click on Product "BioAyurveda Neem Power Hand Sanitizer"
+		driver.findElementByXPath("//p[contains(@title,'BioAyurveda Neem Power  Hand Sanitizer')]").click();
+		// Capture the Price and Delivery Charge
+		Set<String> set = driver.getWindowHandles();
+		List<String> ls = new ArrayList<String>(set);
+		driver.switchTo().window(ls.get(2));
+
+		String str1 = driver.findElementByXPath("//span[@itemprop='price']").getText();
+		int priceSanitizer = Integer.parseInt(str1);
+		String str2 = driver.findElementByXPath("(//span[@class='availCharges'])[2]").getText().replaceAll("\\D", "");
+		int addnlPrice = Integer.parseInt(str2);
+		int sanitizerPrice = priceSanitizer + addnlPrice;
+		// Click on Add to Cart
+		driver.findElementByXPath("//span[text()='ADD TO CART']").click();
+		Thread.sleep(5000);
+		// Click on Cart
+		driver.findElementByXPath("//i[@class='sd-icon sd-icon-cart-icon-white-2']").click();
+		Thread.sleep(3000);
+		// Validate the Proceed to Pay matches the total amount of both the products
+		String finalStr = driver.findElementByXPath("//input[@type='button']").getAttribute("value").replaceAll("\\D",
+				"");
+		int finalTotal = Integer.parseInt(finalStr);
+		if (finalTotal == sanitizerPrice + finalPriceToy) {
+			System.out.println("Total matches.Total amount is:" + finalTotal);
+		} else {
+			System.out.println("Amount invalid" + finalTotal);
+		}
+		// Close all the windows
+
+		driver.quit();
+
+	}
+
+}
