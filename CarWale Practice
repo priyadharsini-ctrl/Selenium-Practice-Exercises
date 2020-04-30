@@ -1,0 +1,150 @@
+package practice;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Carwale {
+
+	public static void main(String[] args) throws InterruptedException {
+
+		// Go to https://www.carwale.com/
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		Actions action = new Actions(driver);
+		// go to url
+		driver.get("https://www.carwale.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		// Click on Used
+		driver.findElementByXPath("//li[@data-tabs='usedCars']").click();
+		// Select the City as Chennai
+		driver.findElementById("usedCarsList").sendKeys("chennai");
+		Thread.sleep(1000);
+		driver.findElementByXPath("//input[@id='usedCarsList']").sendKeys(Keys.ENTER);
+		Thread.sleep(2000);
+		// Select budget min (8L) and max(12L) and Click Search
+		// wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByClassName("up-down-arrow")));
+		// driver.findElementByClassName("up-down-arrow").click();
+
+		driver.findElementByXPath("//li[text()='8 Lakh']").click();
+		Thread.sleep(1000);
+		driver.findElementByXPath("//ul[@id='maxPriceList']/li[text()='12 Lakh']").click();
+		driver.findElementByXPath("//button[@id='btnFindCar']").click();
+		Thread.sleep(3000);
+		driver.findElementById("placesQuery").sendKeys("chennai");
+		driver.findElementByXPath("//a[@cityname='chennai,tamilnadu']").click();
+		// Select Cars with Photos under Only Show Cars With
+		Thread.sleep(3000);
+		driver.findElementByName("CarsWithPhotos").click();
+		// Select Manufacturer as "Hyundai" --> Creta
+		Thread.sleep(3000);
+		wait.until(ExpectedConditions
+				.visibilityOf(driver.findElementByXPath("//ul[@id='makesList']/li[@data-manufacture-en='Hyundai']")));
+
+		WebElement element2 = driver.findElementByXPath("//ul[@id='makesList']/li[@data-manufacture-en='Hyundai']");
+		js.executeScript("arguments[0].scrollIntoView()", element2);
+
+		js.executeScript("arguments[0].click()", element2);
+		Thread.sleep(1000);
+		WebElement element3 = driver.findElementByXPath("(//span[@class='model-txt'])[1]");
+		js.executeScript("arguments[0].scrollIntoView()", element3);
+
+		js.executeScript("arguments[0].click()", element3);
+		// Select Fuel Type as Petrol
+		Thread.sleep(3000);
+		WebElement element = driver.findElementByXPath("//div[@name='fuel']/h3");
+		js.executeScript("arguments[0].scrollIntoView()", element);
+
+		js.executeScript("arguments[0].click()", element);
+		Thread.sleep(1000);
+		driver.findElementByXPath("(//li[@name='Petrol']/span)[1]").click();
+		// Select Best Match as "KM: Low to High"
+		Thread.sleep(3000);
+		WebElement path = driver.findElementByXPath("//select[@id='sort']");
+		Select sel = new Select(path);
+		sel.selectByVisibleText("KM: Low to High");
+		Thread.sleep(3000);
+		// Validate the Cars are listed with KMs Low to High
+		List<WebElement> kmText = driver.findElementsByXPath("//span[@class='slkms vehicle-data__item']");
+		List<Integer> ls_sorted = new ArrayList<Integer>();
+		List<Integer> ls_ori = new ArrayList<Integer>();
+		for (int i = 0; i < kmText.size(); i++) {
+			String string = kmText.get(i).getText().replaceAll("\\D", "");
+			int km = Integer.parseInt(string);
+			ls_ori.add(km);
+		}
+		for (int i = 0; i < kmText.size(); i++) {
+			String string = kmText.get(i).getText().replaceAll("\\D", "");
+			int km = Integer.parseInt(string);
+			ls_sorted.add(km);
+		}
+		Collections.sort(ls_sorted);
+		System.out.println("sorted" + ls_sorted);
+
+		if (ls_sorted == ls_ori) {
+			System.out.println("KM sorted low to high");
+		} else {
+			System.out.println("KM not sorted correctly from low to high");
+		}
+
+		// Add the least KM ran car to Wishlist
+		for (int i = 0; i < ls_ori.size(); i++) {
+			if (ls_ori.get(i).equals(ls_sorted.get(0))) {
+				element = driver
+						.findElementByXPath("(//span[@class='shortlist-icon--inactive shortlist'])[" + (i + 1) + "]");
+				action.moveToElement(element).perform();
+				js.executeScript("arguments[0].click();", element);
+			}
+		}
+
+		// Go to Wishlist and Click on More Details
+		wait.until(ExpectedConditions
+				.visibilityOf(driver.findElementByXPath("//li[@data-action='ShortList&CompareWindow_Click']")));
+		action.moveToElement(driver.findElementByXPath("//li[@data-action='ShortList&CompareWindow_Click']")).perform();
+		driver.findElementByXPath("//li[@data-action='ShortList&CompareWindow_Click']").click();
+		Thread.sleep(1000);
+		driver.findElementByXPath("//a[text()='More details »']").click();
+		// Print all the details under Overview in the Same way as displayed in
+		// application
+		Set<String> set = driver.getWindowHandles();
+		List<String> ls = new ArrayList<String>(set);
+		driver.switchTo().window(ls.get(2));
+		Thread.sleep(2000);
+		List<WebElement> price = driver.findElementsByXPath("//div[@class='equal-width text-light-grey']");
+		List<WebElement> amt = driver.findElementsByXPath("//div[@class='equal-width dark-text']");
+		Map<String, String> map = new LinkedHashMap<String, String>();
+
+		for (int i = 0; i < amt.size(); i++) {
+			String outputP = price.get(i).getText();
+			String outputF = amt.get(i).getText();
+			map.put(outputP, outputF);
+		}
+		for (Entry<String, String> eachEntry : map.entrySet()) {
+			System.out.println(eachEntry);
+		}
+		// Close the browser.
+		driver.quit();
+	}
+}
