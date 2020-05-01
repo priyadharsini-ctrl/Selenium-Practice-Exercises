@@ -1,0 +1,135 @@
+package practice;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Shiksha {
+
+	public static void main(String[] args) throws InterruptedException {
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		Actions action = new Actions(driver);
+		// go to url
+		driver.get("https://studyabroad.shiksha.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+
+		// Mouse over on Colleges and click MS in Computer Science &Engg under MS
+		// Colleges
+		wait.until(ExpectedConditions
+				.visibilityOf(driver.findElementByXPath("(//label[contains(@class,'menuTab-div fnt-wt')])[3]")));
+		action.moveToElement(driver.findElementByXPath("(//label[contains(@class,'menuTab-div fnt-wt')])[3]"))
+				.perform();
+		driver.findElementByXPath("//a[text()='MS in Computer Science &Engg']").click();
+
+		// Select GRE under Exam Accepted and Score 300 & Below
+		Thread.sleep(3000);
+		driver.findElementByXPath("//label[@for='exam-0']//span[1]").click();
+		Thread.sleep(2000);
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByClassName("score-select-field")));
+		WebElement name = driver.findElementByClassName("score-select-field");
+		Select sel = new Select(name);
+		sel.selectByVisibleText("300 & below");
+		Thread.sleep(2000);
+
+		// Max 10 Lakhs under 1st year Total fees, USA under countries
+		driver.findElementByXPath("//p[text()='Max 10 Lakhs']").click();
+		Thread.sleep(2000);
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//label[@for='country-3']")));
+		WebElement element = driver.findElementByXPath("//label[@for='country-3']/span");
+		js.executeScript("arguments[0].scrollIntoView();", element);
+		driver.findElementByXPath("//label[@for='country-3']/span").click();
+
+		// Select Sort By: Low to high 1st year total fees
+		Thread.sleep(3000);
+		WebElement sort = driver.findElementById("categorySorter");
+		Select sl = new Select(sort);
+		sl.selectByValue("fees_ASC");
+		Thread.sleep(3000);
+
+		List<WebElement> list = driver.findElementsByXPath("//div[@class='tuple-box']");
+		for (int i = 1; i <= list.size(); i++) {
+			String university = driver
+					.findElementByXPath(
+							"(//div[@class='detail-col flLt']/p[text()='Public university']/span)[" + i + "]")
+					.getAttribute("class");
+			String scholarship = driver
+					.findElementByXPath("(//div[@class='detail-col flLt']/p[text()='Scholarship']/span)[" + i + "]")
+					.getAttribute("class");
+			String accomodation = driver
+					.findElementByXPath("(//div[@class='detail-col flLt']/p[text()='Accommodation']/span)[" + i + "]")
+					.getAttribute("class");
+			// System.out.println(university);
+			// System.out.println(scholarship);
+			// System.out.println(accomodation);
+			if ((university.equalsIgnoreCase("tick-mark")) && (scholarship.equalsIgnoreCase("tick-mark"))
+					&& (accomodation.equalsIgnoreCase("tick-mark"))) {
+				System.out.println("public university,accomodation and scholarship enabled.");
+				driver.findElementByXPath("(//p[text()='Add to compare'])[" + i + "]").click();
+				break;
+			} else {
+				System.out.println("All three facilities Not Enabled");
+			}
+		}
+
+		// Select the first college under Compare with similar colleges
+		Thread.sleep(2000);
+		driver.findElementByXPath("(//a[@class='add-tag-title'])[1]").click();
+		Thread.sleep(2000);
+
+		// Click on Compare College>
+		driver.findElementByXPath("//strong[text()='Compare Colleges >']").click();
+		Thread.sleep(3000);
+
+		// Select When to Study as 2021
+		driver.findElementByXPath("//label[@for='year1']/span").click();
+
+		// Select Preferred Countries as USA
+		driver.findElementByXPath("//div[@class='input']").click();
+		driver.findElementByXPath("//label[@class='nolnht']/span").click();
+		driver.findElementByXPath("//a[@class='ok-btn']").click();
+
+		// Select Level of Study as Masters
+		driver.findElementByXPath("(//input[@value='Masters']/following::label/span)[1]").click();
+		Thread.sleep(2000);
+
+		// Select Preferred Course as MS
+		driver.findElementByXPath("(//div[@class='input'])[2]").click();
+		driver.findElementByXPath("//li[text()='MS']").click();
+		Thread.sleep(2000);
+
+		// Select Specialization as "Computer Science & Engineering"
+		driver.findElementByXPath("//div[text()='All specializations']").click();
+		driver.findElementByXPath("//li[text()='Computer Science & Engineering']").click();
+
+		// Click on Sign Up
+		driver.findElementByXPath("//a[@class='button-style big-button ']").click();
+
+		// Print all the warning messages displayed on the screen for missed mandatory
+		// fields
+		List<WebElement> list2 = driver.findElementsByXPath("//div[@class='helper-text']");
+		for (WebElement warningMsg : list2) {
+			if (warningMsg.getText().isEmpty() == true) {
+			} else {
+				System.out.println("Warning message: " + warningMsg.getText());
+			}
+		}
+	}
+
+}
