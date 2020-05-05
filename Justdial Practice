@@ -1,0 +1,159 @@
+package practice;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Justdial {
+
+	public static void main(String[] args) throws InterruptedException, IOException {
+
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+
+		// go to url
+		driver.get("https://www.justdial.com/Chennai/Car-Repair-Services-Hyundai-Xcent-in-Porur/nct-11293522");
+		// driver.get("https://www.justdial.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		List<String> sortedCompanyName = new ArrayList<String>();
+		List<String> sortedPhoneNo = new ArrayList<String>();
+
+		/*
+		 * // Set the Location as Chennai
+		 * //driver.findElementByXPath("//input[@id='city']").clear();
+		 * //driver.findElementByXPath("//input[@id='city']").sendKeys("chennai",
+		 * Keys.TAB);
+		 * //driver.findElementById("srchbx").sendKeys("car repair in Porur"); // Click
+		 * Auto Care in the left menu
+		 * driver.findElementByXPath("//span[text()='Auto care']").click();
+		 * 
+		 * // Click Car Repair
+		 * wait.until(ExpectedConditions.elementToBeClickable(driver.
+		 * findElementByXPath("//span[@title='Car Repair']")));
+		 * driver.findElementByXPath("//span[@title='Car Repair']").click();
+		 * Thread.sleep(3000); // Click Car Brand as Hyundai
+		 * wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath(
+		 * "//span[@title='Hyundai']")));
+		 * driver.findElementByXPath("//span[@title='Hyundai']").click(); // Click Make
+		 * as Hyundai Xcent Thread.sleep(3000);
+		 * driver.findElementByXPath("//span[@title='Hyundai Xcent']").click();
+		 * Thread.sleep(3000);
+		 */
+		// Click on Location and Enter Porur
+
+		// Select Porur from the dropdown list
+
+		// Select Distance starting from 1 km
+
+		// Identify all the Service Center having Ratings >=4.5 and Votes >=50
+
+		// Save all the Service Center name and Phone number matching the above
+		// condition in excel
+
+		// Close the browser
+
+		/*
+		 * Thread.sleep(3000);
+		 * driver.findElementByXPath("(//section[@class='jpbg']/span)[last()]").click();
+		 * driver.findElementByXPath("//a[text()='Location']").click();
+		 * driver.findElementByName("sortbydist").sendKeys("Porur",Keys.ARROW_DOWN,Keys.
+		 * ENTER); //driver.findElementById("sortbydistbtn").click();
+		 */
+		Thread.sleep(3000);
+		driver.findElementByXPath("(//section[@class='jpbg']/span)[last()]").click();
+		List<WebElement> list = driver.findElementsByXPath("//span[@class='green-box']");
+		for (int i = 1; i <=list.size(); i++) {
+			double actualrating = Double.parseDouble(driver.findElementByXPath("(//span[@class=\"green-box\"])["+i+"]").getText());
+			
+
+			if (actualrating >= 4.5) {
+				int votes = Integer.parseInt(driver.findElementByXPath("(//p[@class=\"newrtings \"]/a/span[3])["+i+"]").getText().replaceAll("\\D", ""));
+
+				
+
+					if (votes >= 50) {
+						String serviceCentre = driver.findElementByXPath(
+								"(//span[@class=\"lng_cont_name\"])["+i+"]")
+								.getText();
+						System.out.println("centre name" + serviceCentre);
+						sortedCompanyName.add(serviceCentre);
+						// List<WebElement> no = driver.findElementsByXPath("(//p[@class=\"contact-info
+						// \"]/span/a/b)["+rating+"]/span");
+						String phoneno = "";
+						Map<String, String> map = new LinkedHashMap<String, String>();
+						map.put("dc", "+");
+						map.put("fe", "(");
+						map.put("hg", ")");
+						map.put("ba", "-");
+						map.put("acb", "0");
+						map.put("yz", "1");
+						map.put("wx", "2");
+						map.put("vu", "3");
+						map.put("ts", "4");
+						map.put("rq", "5");
+						map.put("po", "6");
+						map.put("nm", "7");
+						map.put("lk", "8");
+						map.put("ji", "9");
+						for (int j = 1; j <= 16; j++) {
+
+							String n1 = driver.findElementByXPath(
+									"((//p[@class=\"contact-info \"]/span/a/b)["+i+"]/span)["+j+"]")
+									.getAttribute("class");
+							System.out.println(n1);
+							String[] splitval = n1.split("-");
+							String val = splitval[1];
+							Set<Entry<String, String>> entrySet = map.entrySet();
+							for (Entry<String, String> entry : entrySet) {
+								if (entry.getKey().equalsIgnoreCase(val)) {
+									phoneno = phoneno + (entry.getValue());
+								}
+							}
+						}
+						sortedPhoneNo.add(phoneno.substring(6, 16));
+					}
+
+				}
+
+			
+		}
+		File file = new File("./data/output.xlsx");
+		XSSFWorkbook wbook = new XSSFWorkbook();
+		XSSFSheet sh = wbook.createSheet("first Sheet");
+		for (int k = 0; k < sortedCompanyName.size(); k++) {
+
+			sh.createRow(k).createCell(0).setCellValue(sortedCompanyName.get(k));
+			sh.getRow(k).createCell(1).setCellValue(sortedPhoneNo.get(k));
+
+		}
+		FileOutputStream fos = new FileOutputStream(file);
+		wbook.write(fos);
+		wbook.close();
+
+		driver.close();
+	}
+}
