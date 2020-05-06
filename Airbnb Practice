@@ -1,0 +1,219 @@
+package practice;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Airbnb {
+
+	public static void main(String[] args) throws InterruptedException {
+
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		// go to url
+		driver.manage().window().maximize();
+		driver.get("https://www.airbnb.co.in/");
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+
+		// Type Coorg in location and Select Coorg, Karnataka
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//button[@aria-label='OK']")));
+		driver.findElementByXPath("//button[@aria-label='OK']").click();
+		Thread.sleep(2000);
+		driver.findElementByXPath("//input[@id='bigsearch-query-attached-query']").sendKeys("coorg");
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("//div[text()='Coorg, Karnataka']")));
+		driver.findElementByXPath("//div[text()='Coorg, Karnataka']").click();
+		Thread.sleep(2000);
+		// Select the Start Date as June 1st and End Date as June 5th
+		driver.findElementByXPath("//div[text()='Check in / Check out']").click();
+		Thread.sleep(2000);
+		driver.findElementByXPath("//div[text()='Check in / Check out']").click();
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath("(//div[text()='1'])[3]")));
+		driver.findElementByXPath("(//div[text()='1'])[3]").click();
+		driver.findElementByXPath("(//div[text()='5'])[3]").click();
+		// Select guests as 6 adults, 3 child and Click Search
+		driver.findElementByXPath("//div[text()='Add guests']").click();
+		for (int i = 1; i <= 6; i++) {
+			driver.findElementByXPath("//button[@aria-label='increase value']").click();
+		}
+		for (int i = 1; i <= 3; i++) {
+			driver.findElementByXPath("(//button[@aria-label='increase value'])[2]").click();
+		}
+		driver.findElementByXPath("//button[@type='submit']").click();
+		// Click Cancellation flexibility and enable the filter and Save
+		wait.until(ExpectedConditions
+				.elementToBeClickable(driver.findElementByXPath("//span[text()='Cancellation flexibility']")));
+		driver.findElementByXPath("//span[text()='Cancellation flexibility']").click();
+		driver.findElementByXPath("//button[@role='switch']").click();
+		driver.findElementByXPath("//button[text()='Save']").click();
+		Thread.sleep(8000);
+		// Select Type of Place as Entire Place and Save
+		wait.until(
+				ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//span[text()='Type of place']")));
+		driver.findElementByXPath("//span[text()='Type of place']").click();
+		wait.until(ExpectedConditions
+				.elementToBeClickable(driver.findElementByXPath("//input[@name='Entire place']/following::span")));
+		driver.findElementByXPath("//input[@name='Entire place']/following::span").click();
+		driver.findElementByXPath("//button[@id='filter-panel-save-button']").click();
+		Thread.sleep(3000);
+		// Set Min price as 3000 and max price as 5000
+		driver.findElementByXPath("//span[@aria-label='Price']").click();
+		driver.findElementByXPath("//input[@id='price_filter_min']").sendKeys(Keys.CONTROL, "a");
+		driver.findElementByXPath("//input[@id='price_filter_min']").sendKeys(Keys.DELETE);
+		driver.findElementByXPath("//input[@id='price_filter_min']").sendKeys("3000");
+		driver.findElementByXPath("//input[@id='price_filter_max']").sendKeys(Keys.CONTROL, "a");
+		driver.findElementByXPath("//input[@id='price_filter_max']").sendKeys(Keys.DELETE);
+		driver.findElementByXPath("//input[@id='price_filter_max']").sendKeys("5000");
+		driver.findElementByXPath("//button[@id='filter-panel-save-button']").click();
+		Thread.sleep(3000);
+		// Click More Filters and set 3 Bedrooms and 3 Bathrooms
+		driver.findElementByXPath("//span[text()='More filters']").click();
+		Thread.sleep(1000);
+		for (int i = 1; i <= 3; i++) {
+			driver.findElementByXPath("(//button[@aria-label='increase value'])[2]").click();
+		}
+		for (int i = 1; i <= 3; i++) {
+			driver.findElementByXPath("(//button[@aria-label='increase value'])[3]").click();
+		}
+		// Check the Amenities with Kitchen, Facilities with Free parking on premisses,
+		// Property as House and Host Language as English
+		// and click on Stays only when stays available
+		driver.findElementByXPath("//input[@name='Kitchen']/following::span").click();
+		driver.findElementByXPath("//input[@name='Free parking on premises']/following::span").click();
+		Thread.sleep(3000);
+
+		try {
+			if (driver.findElementByXPath("//input[@name='House']/following::span").isEnabled() == true) {
+				driver.findElementByXPath("//input[@name='House']/following::span").click();
+			}
+		} catch (Exception e) {
+			System.out.println("exception");
+		}
+
+		/*
+		 * try { if
+		 * (driver.findElementByXPath("//input[@name='Bungalow']/following::span").
+		 * isDisplayed() == true) {
+		 * driver.findElementByXPath("//input[@name='Bungalow']/following::span").click(
+		 * ); } } catch (Exception e) { System.out.println("exception"); }
+		 */
+
+		driver.findElementByXPath("//input[@name='English']/following::span").click();
+		Thread.sleep(2000);
+		String stay = driver.findElementByXPath("//button[contains(text(),'Show')]").getText().replaceAll("\\D", "");
+		int numberOfStay = Integer.parseInt(stay);
+		if (numberOfStay >= 1) {
+			driver.findElementByXPath("//button[contains(text(),'Show')]").click();
+		} else {
+			System.out.println("No stay available");
+		}
+		Thread.sleep(3000);
+		// Click Prahari Nivas, the complete house
+		try {
+			wait.until(ExpectedConditions.elementToBeClickable(
+					driver.findElementByXPath("(//a[@aria-label='Prahari Nivas, the complete house'])[2]")));
+			driver.findElementByXPath("(//a[@aria-label='Prahari Nivas, the complete house'])[2]").click();
+		} catch (Exception e) {
+			System.out.println("Prahari Nivas not found hence click first resulting house");
+		}
+		/*
+		 * try {
+		 * driver.findElementByXPath("//div[@itemprop='itemListElement']").click();
+		 * }catch (Exception e) { }
+		 */
+		// Click on "Show all * amenities"
+		Set<String> set = driver.getWindowHandles();
+		List<String> ls = new ArrayList<String>(set);
+		driver.switchTo().window(ls.get(2));
+		Thread.sleep(5000);
+		try {
+			wait.until(ExpectedConditions
+					.elementToBeClickable(driver.findElementByXPath("//button[contains(text(),'amenities')]")));
+			WebElement element = driver.findElementByXPath("//button[contains(text(),'amenities')]");
+			js.executeScript("arguments[0].click()", element);
+
+		} catch (Exception e) {
+		}
+		try {
+			wait.until(ExpectedConditions
+					.elementToBeClickable(driver.findElementByXPath("//a[contains(text(),'amenities')]")));
+			WebElement element = driver.findElementByXPath("//a[contains(text(),'amenities')]");
+			js.executeScript("arguments[0].click()", element);
+
+		} catch (Exception e) {
+		}
+		Thread.sleep(3000);
+		// Print all the Not included amenities
+		List<String> lis = new ArrayList<String>();
+		for (int i = 3; i <= 7; i++) {
+			String text = driver.findElementByXPath("(//del[@aria-hidden='true'])[" + i + "]").getText();
+			lis.add(text);
+		}
+		System.out.println("Not Included amenities: " + lis);
+
+		driver.findElementByXPath("(//button[@aria-label='Close'])[2]").click();
+		Thread.sleep(2000);
+		// Verify the Check-in date, Check-out date and Guests
+		String checkInDate = driver.findElementByXPath("//input[@id='checkin']/following-sibling::span/following::div")
+				.getText();
+		String checkOutDate = driver
+				.findElementByXPath("//input[@id='checkout']/following-sibling::span/following::div").getText();
+		String guests = driver.findElementByXPath("//div[@class='guest-label']/span").getText();
+		System.out.println(checkInDate);
+		System.out.println(checkOutDate);
+		System.out.println(guests);
+		if (checkInDate.equalsIgnoreCase("6/1/2020") && checkOutDate.equalsIgnoreCase("6/5/2020")
+				&& guests.equalsIgnoreCase("9 guests") == true) {
+			System.out.println("Input date and number of guests verified");
+		} else {
+			System.out.println("Information date and guests are invalid");
+		}
+		// Read all the Sleeping arrangements and Print
+
+		Map<String, String> map = new LinkedHashMap<String, String>();
+		for (int i = 1; i <= 3; i++) {
+			String key = driver.findElementByXPath("//div[contains(text(),'Bedroom " + i + "')]").getText();
+			String text = driver.findElementByXPath("(//div[contains(text(),'Bedroom " + i + "')]/following::div)[1]")
+					.getText();
+			map.put(key, text);
+		}
+		driver.findElementByXPath("(//button[@type='button'])[17]").click();
+		Thread.sleep(2000);
+		String key = driver.findElementByXPath("//div[contains(text(),'Bedroom 4')]").getText();
+		String text = driver.findElementByXPath("(//div[contains(text(),'Bedroom 4')]/following::div)[1]").getText();
+		map.put(key, text);
+
+		driver.findElementByXPath("(//button[@type='button'])[18]").click();
+		Thread.sleep(2000);
+		String key5 = driver.findElementByXPath("//div[contains(text(),'Bedroom 5')]").getText();
+
+		String text5 = driver.findElementByXPath("(//div[contains(text(),'Bedroom 5')]/following::div)[1]").getText();
+		map.put(key, text);
+		map.put(key5, text5);
+		System.out.println("Slepping arrangements: " + map);
+
+		// Close all the browsers
+
+		driver.quit();
+
+	}
+
+}
