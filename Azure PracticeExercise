@@ -1,0 +1,123 @@
+package practice;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Azure {
+
+	public static void main(String[] args) throws InterruptedException, IOException {
+
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver_80.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		Actions action = new Actions(driver);
+		// go to url
+		driver.manage().window().maximize();
+		driver.get("https://azure.microsoft.com/en-in/");
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+
+		// Click on Pricing
+		Thread.sleep(2000);
+		driver.findElementByXPath("//a[@id='navigation-pricing']").click();
+		// Click on Pricing Calculator
+		Thread.sleep(3000);
+		driver.findElementByXPath("(//a[@data-event='global-navigation-secondarynav-clicked-topmenu'])[2]").click();
+		// Click on Containers
+		Thread.sleep(3000);
+		driver.findElementByXPath("//button[@value='containers']").click();
+		// Select Container Instances
+		Thread.sleep(3000);
+		driver.findElementByXPath("(//span[text()='Container Instances'])[3]").click();
+		// Click on Container Instance Added View
+		driver.findElementByXPath("//a[@id='new-module-loc']").click();
+		// Select Region as "South India"
+		WebElement sel = driver.findElementByXPath("//select[@name='region']");
+		Select select = new Select(sel);
+		select.selectByValue("south-india");
+		// Set the Duration as 180000 seconds
+		driver.findElementByXPath("//input[@name='seconds']").sendKeys(Keys.CONTROL, "a");
+		driver.findElementByXPath("//input[@name='seconds']").sendKeys(Keys.DELETE);
+		driver.findElementByXPath("//input[@name='seconds']").sendKeys("180000");
+		// Select the Memory as 4GB
+		WebElement mem = driver.findElementByXPath("//select[@name='memory']");
+		Select selMem = new Select(mem);
+		selMem.selectByValue("4");
+		// Enable SHOW DEV/TEST PRICING
+		driver.findElementByXPath("//button[@id='devtest-toggler']").click();
+		// Select Indian Rupee as currency
+		WebElement currency = driver.findElementByXPath("//select[@aria-label='Currency']");
+		Select selCurrency = new Select(currency);
+		selCurrency.selectByValue("INR");
+		// Print the Estimated monthly price
+		String price = driver.findElementByXPath("(//span[@class='numeric']/span)[last()]").getText().substring(1);
+		System.out.println("Estimated monthly price is :Rs." + price);
+		// Click on Export to download the estimate as excel
+		driver.findElementByXPath("//button[@class='calculator-button button-transparent export-button']").click();
+		Thread.sleep(6000);
+		// Verify the downloded file in the local folder
+
+		XSSFWorkbook wbook = new XSSFWorkbook("C:\\Users\\dharsini\\Downloads\\ExportedEstimate.xlsx");
+		XSSFSheet sheet = wbook.getSheetAt(0);
+		System.out.println("Download verified . sheet name is: " + sheet.getSheetName());
+		wbook.close();
+
+		// Navigate to Example Scenarios and Select CI/CD for Containers
+		wait.until(
+				ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//a[text()='Example Scenarios']")));
+		WebElement element = driver.findElementByXPath("//a[text()='Example Scenarios']");
+		js.executeScript("arguments[0].click()", element);
+		Thread.sleep(2000);
+		WebElement element2 = driver.findElementByXPath("//span[text()='CI/CD for Containers']");
+		js.executeScript("arguments[0].click()", element2);
+
+		// Click Add to Estimate
+		WebElement element3 = driver.findElementByXPath("//button[text()='Add to estimate']");
+		js.executeScript("arguments[0].click()", element3);
+
+		Thread.sleep(6000);
+		// Change the Currency as Indian Rupee.
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("//select[@aria-label='Currency']")));
+		WebElement currencyNew = driver.findElementByXPath("//select[@aria-label='Currency']");
+		Select selCurrencyNew = new Select(currencyNew);
+		selCurrencyNew.selectByValue("INR");
+		// Enable SHOW DEV/TEST PRICING
+		wait.until(
+				ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//button[@id='devtest-toggler']")));
+		WebElement element4 = driver.findElementByXPath("//button[@id='devtest-toggler']");
+		js.executeScript("arguments[0].click()", element4);
+
+		Thread.sleep(5000);
+		// Export the Estimate
+		action.moveToElement(
+				driver.findElementByXPath("//button[@class='calculator-button button-transparent export-button']"))
+				.click().build().perform();
+
+		Thread.sleep(6000);
+		// Verify the downloded file in the local folder
+		XSSFWorkbook wbook1 = new XSSFWorkbook("C:\\Users\\dharsini\\Downloads\\ExportedEstimate (1).xlsx");
+		XSSFSheet sheet1 = wbook1.getSheetAt(0);
+		System.out.println("Download verified . sheet name is: " + sheet1.getSheetName());
+		wbook1.close();
+	}
+
+}
